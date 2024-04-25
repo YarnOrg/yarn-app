@@ -37,6 +37,14 @@ Send POST request on http://localhost:8080/users using Postman
 
 ```
 
+### Connect to DB
+
+```
+
+psql postgres
+
+```
+
 ```
 docker build -t yarn-app .
 docker run -p 8080:8080 yarn-app

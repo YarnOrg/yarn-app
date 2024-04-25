@@ -7,10 +7,10 @@ import (
 )
 
 type User struct {
-	ID           int
-	Username     string
-	Email        string
-	PasswordHash string
+	ID           int    `json:"id"`
+	Username     string `json:"username"`
+	Email        string `json:"email"`
+	PasswordHash string `json:"-"`
 }
 
 func CreateUser(ctx context.Context, u User) (int, error) {

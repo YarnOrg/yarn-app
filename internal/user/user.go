@@ -1,13 +1,17 @@
 package user
 
 import (
+	"database/sql"
 	"net/http"
+	"strconv"
+
+	"context"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func RegisterRoutes(r *gin.Engine) {
+func RegisterUserRoutes(r *gin.Engine) {
 	r.POST("/users", createUser)
 	r.GET("/users/:id", getUser)
 }
@@ -26,19 +30,38 @@ func createUser(c *gin.Context) {
 	}
 	u.PasswordHash = string(hashedPassword)
 
-	if err := CreateUser(c, u); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not create user"})
+	ctx := context.Background()
+	id, err := CreateUser(ctx, u)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not create user: " + err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "User created"})
+	c.JSON(http.StatusCreated, gin.H{"id": id})
 }
 
 func getUser(c *gin.Context) {
-	userID := c.Param("id")
+	userID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
 
-	// Add user retrieval logic here
-	// Query database for user by userID
+	ctx := context.Background()
+	u, err := GetUserByID(ctx, userID)
+	if err != nil {
+		if err == sql.ErrNoRows { // You need to import the database/sql package for this
+			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not retrieve user: " + err.Error()})
+		return
+	}
 
-	c.JSON(http.StatusOK, gin.H{"user": userID})
+	if u.ID == 0 { // Additional check if user ID returned is 0, indicating no data found
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, u)
 }
