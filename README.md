@@ -12,7 +12,7 @@ What things you need to install the software and how to install them:
 - [PostgreSQL](https://www.postgresql.org/download/)
 - [Docker](https://docs.docker.com/get-docker/) (optional, for containerization)
 
-### Local setup
+### Local setup via app or docker
 
 ```bash
    git clone https://github.com/YarnOrg/yarn-app.git
@@ -20,6 +20,15 @@ What things you need to install the software and how to install them:
    go mod tidy
    cp .env.example .env
    go run cmd/api/main.go
+```
+
+```
+docker build -t yarn-app .
+docker run -p 8080:8080 yarn-app
+
+or with env vars
+
+docker run -p 8080:8080 yarn-app -e ....
 ```
 
 ## Directory Structure

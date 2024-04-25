@@ -1,0 +1,6 @@
+CREATE TABLE wallets (
+    wallet_id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) UNIQUE,
+    balance DECIMAL(10, 2) DEFAULT 0.00,
+    last_updated TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);

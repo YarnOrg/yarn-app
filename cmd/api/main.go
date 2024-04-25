@@ -16,6 +16,12 @@ func main() {
 		userGroup.GET("/:id", api.GetUser)
 	}
 
+	router.Group("/users").POST("/", user.createUser)
+	router.Group("/users").GET("/:id", user.getUser)
+	router.Group("/transactions").POST("/", transaction.createTransaction)
+	router.Group("/messages").POST("/", chat.sendMessage)
+	router.Group("/products").POST("/", marketplace.listProduct)
+
 	// Start server
 	router.Run(":8080")
 }
