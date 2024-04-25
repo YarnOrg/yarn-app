@@ -1,7 +1,10 @@
 package main
 
 import (
+	"log"
+
 	"github.com/YarnOrg/yarn-app/internal/user/api"
+	"github.com/YarnOrg/yarn-app/pkg/db"
 
 	"github.com/gin-gonic/gin"
 )
@@ -22,6 +25,12 @@ func main() {
 	router.Group("/messages").POST("/", chat.sendMessage)
 	router.Group("/products").POST("/", marketplace.listProduct)
 
+	//
+	if err := db.ConnectDB("user=postgres dbname=socialfinance sslmode=disable"); err != nil {
+		log.Fatal("Could not connect to database:", err)
+	}
+
+	user.RegisterUserRoutes(router)
 	// Start server
 	router.Run(":8080")
 }

@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func RegisterRoutes(r *gin.Engine) {
@@ -12,15 +13,23 @@ func RegisterRoutes(r *gin.Engine) {
 }
 
 func createUser(c *gin.Context) {
-	// Parse request data
-	var newUser UserData
-	if err := c.ShouldBindJSON(&newUser); err != nil {
+	var u User
+	if err := c.ShouldBindJSON(&u); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	// user creation logic here
-	// Insert newUser into database
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.PasswordHash), bcrypt.DefaultCost)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not encrypt password"})
+		return
+	}
+	u.PasswordHash = string(hashedPassword)
+
+	if err := CreateUser(c, u); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not create user"})
+		return
+	}
 
 	c.JSON(http.StatusCreated, gin.H{"message": "User created"})
 }

@@ -1,4 +1,4 @@
-CREATE DATABASE socialfinance;
+CREATE DATABASE yarn-core;
 
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,

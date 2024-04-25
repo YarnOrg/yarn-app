@@ -22,6 +22,21 @@ What things you need to install the software and how to install them:
    go run cmd/api/main.go
 ```
 
+### Test the API
+
+
+```
+
+Send POST request on http://localhost:8080/users using Postman
+
+{
+    "username": "testuser",
+    "email": "test@example.com",
+    "password_hash": "yourpassword"
+}
+
+```
+
 ```
 docker build -t yarn-app .
 docker run -p 8080:8080 yarn-app
