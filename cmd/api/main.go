@@ -1,66 +1,31 @@
-// package main
-
-// import (
-// 	"github.com/YarnOrg/yarn-app/internal/user"
-// 	// "github.com/YarnOrg/yarn-app/pkg/db"
-
-// 	// "internal/user"
-// 	// "pkg/db"
-
-// 	"github.com/gin-gonic/gin"
-// )
-
-// func main() {
-// 	router := gin.Default()
-
-// 	//
-// 	// if err := db.ConnectDB("user=mohameda password=postgres dbname=yarn sslmode=disable"); err != nil {
-// 	// 	log.Fatal("Could not connect to database:", err)
-// 	// }
-
-// 	user.RegisterUserRoutes(router)
-// 	// Start server
-// 	router.Run(":8080")
-// }
-
 package main
 
 import (
 	"log"
 	"os"
 
-	"github.com/YarnOrg/yarn-app/models"
-	"github.com/YarnOrg/yarn-app/storage"
-	"github.com/gofiber/fiber/v2"
+	"github.com/YarnOrg/yarn-app/internal/user"
+	"github.com/YarnOrg/yarn-app/pkg/db"
+
+	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
 
 func main() {
 	if err := godotenv.Load(); err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
+		log.Fatal("Error loading .env file")
 	}
 
-	config := &storage.Config{
-		Host:     os.Getenv("DB_HOST"),
-		Port:     os.Getenv("DB_PORT"),
-		User:     os.Getenv("DB_USER"),
-		Password: os.Getenv("DB_PASS"),
-		DBName:   os.Getenv("DB_NAME"),
-		SSLMode:  os.Getenv("DB_SSLMODE"),
-	}
-
-	db, err := storage.NewConnection(config)
+	dsn := os.Getenv("DATABASE_URL")
+	database, err := db.Connect(dsn)
 	if err != nil {
-		log.Fatalf("could not connect to database: %v", err)
+		log.Fatal("Failed to connect to database:", err)
 	}
 
-	if err := models.MigrateUsers(db); err != nil {
-		log.Fatalf("could not migrate database: %v", err)
-	}
+	repo := user.NewRepository(database)
 
-	app := fiber.New()
-	repo := storage.Repository{DB: db}
-	repo.SetupRoutes(app)
+	router := gin.Default()
+	user.RegisterUserRoutes(router, repo)
 
-	log.Fatal(app.Listen(":8080"))
+	log.Fatal(router.Run(":8080"))
 }
